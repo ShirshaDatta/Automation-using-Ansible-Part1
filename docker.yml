@@ -1,0 +1,37 @@
+- hosts: dockerhost
+  gather_facts: false
+  tasks:
+   - name: conf yum for docker
+     yum_repository:
+        name: dockerrepo
+        baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
+        description: my docker repo desc
+        enabled: true
+        gpgcheck: 0
+   - name: install docker software
+     command: "yum install docker-ce --nobest -y"
+   - name: start docker services
+     service:
+       name: "docker"
+       state: started
+       enabled: yes
+   - name: install software python36
+     package:
+       name: python36
+       state: present
+   - name: install docker python library
+     pip:
+       name: docker-py
+   - name: pull image from hub
+     docker_image:
+       name: httpd:latest
+       source: pull
+   - name: run_container
+     docker_container:
+       name: myweb
+       image: httpd:latest
+       state: started
+       ports:
+       - "8082:80"
+       tty: true
+       detach: true
